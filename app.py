@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Susun Kata Jepang - Bunpou Master", layout="centered")
 
-# --- DATABASE SOAL ---
+# --- DATABASE SOAL (6 POLA GRAMMAR LENGKAP) ---
 if "database_soal" not in st.session_state:
     st.session_state.database_soal = [
         # === POLA 1: ～をはじめ（として） ===
@@ -205,7 +205,6 @@ if "database_soal" not in st.session_state:
             "soal": ["おめしあがり", "バイキングけいしき", "すきな", "を", "すきな", "ですから", "ください", "だけ", "とって", "の", "しょくじ", "、"]
         }
     ]
-
 # --- INISIALISASI STATE ---
 if "pola_terpilih" not in st.session_state:
     st.session_state.pola_terpilih = "Semua Pola"
