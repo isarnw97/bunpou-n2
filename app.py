@@ -1,6 +1,6 @@
 import streamlit as st
 
-st.set_page_config(page_title="Susun Kata Jepang - Bunpou Master", layout="centered")
+st.set_page_config(page_title="Susun Kata Jepang - Bab 7", layout="centered")
 
 # --- DATABASE SOAL (6 POLA GRAMMAR LENGKAP) ---
 if "database_soal" not in st.session_state:
@@ -205,12 +205,10 @@ if "database_soal" not in st.session_state:
             "soal": ["おめしあがり", "バイキングけいしき", "すきな", "を", "すきな", "ですから", "ください", "だけ", "とって", "の", "しょくじ", "、"]
         }
     ]
-# --- INISIALISASI STATE ---
-if "pola_terpilih" not in st.session_state:
-    st.session_state.pola_terpilih = "Semua Pola"
 
-if "index_soal_lokal" not in st.session_state:
-    st.session_state.index_soal_lokal = 0
+# Inisialisasi State
+if "index_soal" not in st.session_state:
+    st.session_state.index_soal = 0
 
 if "jawaban_user" not in st.session_state:
     st.session_state.jawaban_user = []
@@ -227,9 +225,15 @@ if "idx_kata_dipilih" not in st.session_state:
 if "mode_tukar" not in st.session_state:
     st.session_state.mode_tukar = False
 
-# --- CUSTOM CSS ---
+soal_sekarang = st.session_state.database_soal[st.session_state.index_soal]
+
+if not st.session_state.bank_kata and not st.session_state.jawaban_user:
+    st.session_state.bank_kata = [{"id": i, "teks": kata, "dipakai": False} for i, kata in enumerate(soal_sekarang["soal"])]
+
+# --- CSS KHUSUS UNTUK TAMPILAN KAPSU/PILL KATA SEPERTI GAMBAR ---
 st.markdown("""
 <style>
+    /* Mengubah Container Tombol Bank Kata menjadi Inline Flex ke samping */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-wrap: wrap !important;
@@ -237,6 +241,31 @@ st.markdown("""
         align-items: center !important;
     }
     
+    div[data-testid="stHorizontalBlock"] > div {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        min-width: 0 !important;
+    }
+
+    /* Tampilan Kotak Kapsul / Pill Sesuai Gambar */
+    div[data-testid="stHorizontalBlock"] button {
+        border-radius: 50px !important;            /* Bulat lonjong sempurna */
+        border: 1px solid #cccccc !important;       /* Garis tepi tipis abu-abu */
+        background-color: #ffffff !important;      /* Warna dasar putih */
+        color: #333333 !important;                 /* Warna teks gelap */
+        font-size: 1.1rem !important;
+        padding: 6px 18px !important;               /* Jarak dalam yang empuk */
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    /* Efek saat tombol di-hover / diklik */
+    div[data-testid="stHorizontalBlock"] button:hover {
+        border-color: #888888 !important;
+        background-color: #f7f7f7 !important;
+    }
+
+    /* Kotak Info Soal */
     .info-box {
         background-color: #e8f4fd;
         padding: 15px;
@@ -247,6 +276,7 @@ st.markdown("""
     .text-bunpou { font-size: 1.05rem; font-weight: bold; color: #1fa2ff; margin: 0 0 6px 0; }
     .text-arti { font-size: 1.2rem; font-weight: bold; color: #1a1a1a; margin: 0; }
 
+    /* Indikator Mode Tukar */
     .swap-indicator {
         background-color: #e6fffa;
         border: 1px dashed #319795;
@@ -260,51 +290,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Tampilan Header
-st.title("🦉 Bunpou Master")
-
-# --- DROPDOWN PILIH POLA GRAMMAR ---
-daftar_pola_unik = list(dict.fromkeys([item["pola"] for item in st.session_state.database_soal]))
-opsi_pola = ["Semua Pola"] + daftar_pola_unik
-
-pola_terpilih = st.selectbox(
-    "📖 **Pilih Pola Grammar:**",
-    options=opsi_pola,
-    index=opsi_pola.index(st.session_state.pola_terpilih) if st.session_state.pola_terpilih in opsi_pola else 0,
-    key="select_pola"
-)
-
-# Cek pergantian filter
-if pola_terpilih != st.session_state.pola_terpilih:
-    st.session_state.pola_terpilih = pola_terpilih
-    st.session_state.index_soal_lokal = 0
-    st.session_state.jawaban_user = []
-    st.session_state.bank_kata = []
-    st.session_state.idx_kata_dipilih = None
-    st.session_state.status_periksa = False
-    st.rerun()
-
-# Filter Soal
-if st.session_state.pola_terpilih == "Semua Pola":
-    soal_terfilter = st.session_state.database_soal
-else:
-    soal_terfilter = [s for s in st.session_state.database_soal if s["pola"] == st.session_state.pola_terpilih]
-
-if st.session_state.index_soal_lokal >= len(soal_terfilter):
-    st.session_state.index_soal_lokal = 0
-
-soal_sekarang = soal_terfilter[st.session_state.index_soal_lokal]
-
-# Inisialisasi Bank Kata
-if not st.session_state.bank_kata and not st.session_state.jawaban_user:
-    st.session_state.bank_kata = [{"id": i, "teks": kata, "dipakai": False} for i, kata in enumerate(soal_sekarang["soal"])]
-
+# Tampilan Atas
+st.title("🦉 Bunpou Master (BAB 7)")
+st.caption(f"Soal {soal_sekarang['id']} dari {len(st.session_state.database_soal)}")
 st.markdown("---")
 
-# Tampilkan Informasi Soal
-st.caption(f"Menampilkan Soal **{st.session_state.index_soal_lokal + 1}** dari **{len(soal_terfilter)}** untuk kategori ini (ID Soal: #{soal_sekarang['id']})")
-
-# Kotak Petunjuk
+# Kotak Petunjuk Soal
 st.markdown(f"""
 <div class="info-box">
     <p class="text-bunpou">📖 {soal_sekarang['pola']}</p>
@@ -312,7 +303,7 @@ st.markdown(f"""
 </div>
 """, unsafe_allow_html=True)
 
-# --- FRAGMENT KUIS ---
+# --- MENU UTAMA INTERAKTIF (FRAGMENT) ---
 @st.fragment
 def render_kuis_lengkap():
     st.write("### Kalimat Susunanmu:")
@@ -372,23 +363,27 @@ def render_kuis_lengkap():
                         kata_bank["dipakai"] = False
                 st.rerun()
 
-    # 2. BANK KATA PILIHAN
+    # 2. BANK KATA PILIHAN (Bentuk Kapsul & Berjajar Alami Ke Samping)
     st.write("### Pilihan Kata:")
     
-    # 修正箇所: st.columns を使わず、1グループとして表示
-    # ボタンを行ごとに並べる代わりに、標準的なボタンコンテナを利用
-    for item in st.session_state.bank_kata:
-        if not item["dipakai"]:
-            if st.button(item["teks"], key=f"pilih_{item['id']}"):
-                item["dipakai"] = True
-                st.session_state.jawaban_user.append(item)
-                st.rerun()
+    # Menggunakan st.columns secara merata dalam 1 container horizontal yang diatur CSS Flexbox
+    cols = st.columns(len(st.session_state.bank_kata))
+    for idx, item in enumerate(st.session_state.bank_kata):
+        with cols[idx]:
+            if item["dipakai"]:
+                st.button(" ", key=f"disabled_{item['id']}", disabled=True)
+            else:
+                if st.button(item["teks"], key=f"pilih_{item['id']}"):
+                    item["dipakai"] = True
+                    st.session_state.jawaban_user.append(item)
+                    st.rerun()
 
+# Jalankan Komponen Utama Kuis
 render_kuis_lengkap()
 
 st.markdown("<br><hr>", unsafe_allow_html=True)
 
-# 3. TOMBOL NAVIGASI
+# 3. TOMBOL NAVIGASI UTAMA
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -406,7 +401,7 @@ with col2:
 
 with col3:
     if st.button("Lanjut ➡️", use_container_width=True):
-        st.session_state.index_soal_lokal = (st.session_state.index_soal_lokal + 1) % len(soal_terfilter)
+        st.session_state.index_soal = (st.session_state.index_soal + 1) % len(st.session_state.database_soal)
         st.session_state.jawaban_user = []
         st.session_state.bank_kata = []
         st.session_state.idx_kata_dipilih = None
@@ -424,3 +419,4 @@ if st.session_state.status_periksa:
         st.success(f"🎉 **正解 (Benar)!** Susunan bunpou kamu sudah sempurna!\n\n**🇯🇵 Kanji:** {soal_sekarang['kanji']}\n\n**💡 Hiragana:** {soal_sekarang['hiragana']}")
     else:
         st.error(f"❌ **残念 (Kurang Tepat).**\n\n**Susunan yang benar:**\n\n`{' '.join(kunci_strings)}`\n\n**🇯🇵 Kanji asli:** {soal_sekarang['kanji']}\n\n**💡 Hiragana:** {soal_sekarang['hiragana']}")
+
