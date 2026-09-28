@@ -13,7 +13,7 @@ if "database_soal" not in st.session_state:
             "hiragana": "この たいいくかんでは すいえいを はじめ、 いろいろな スポーツが たのしめる。",
             "arti": "Di gedung olahraga ini, kita bisa menikmati berbagai macam olahraga, dimulai dari renang.",
             "kunci": ["この", "体育館", "では", "水泳", "を", "はじめ", "、", "いろいろな", "スポーツ", "が", "楽しめる", "。"],
-            "soal": ["たのしめる", "すいえい", "いろいろな", "スポーツ", "はじめ", "この", "が", "を", "たいいくかん", "で", "は", "、"。"]
+            "soal": ["たのしめる", "すいえい", "いろいろな", "スポーツ", "はじめ", "この", "が", "を", "たいいくかん", "で", "は", "、", "。"]
         },
         {
             "id": 2,
